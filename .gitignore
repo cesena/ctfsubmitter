@@ -1,0 +1,15 @@
+# Generated documentation
+.yardoc/
+doc/
+
+# Log and temporary files
+log/
+tmp/
+
+# Gems
+pkg/
+vendor/cache/*.gem
+
+# IntelliJ IDEA project files
+.idea/
+*.iml

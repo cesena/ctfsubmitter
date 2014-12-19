@@ -1,8 +1,24 @@
+# CTF-o-MATOR
+# [
+#   { "flag":"THE FLAG HERE",
+#     "prio":"PRIORITY OF THE ATTACK",
+#     "a":"SCRIPT NAME USED FOR THE ATTACK, CAN BE NULL",
+#     "t":"ATTACKED TEAM",
+#     "s":"ATTACKED SERVICE"},
+#   { "flag":"THE FLAG HERE",
+#     "prio":"PRIORITY OF THE ATTACK",
+#     "a":"SCRIPT NAME USED FOR THE ATTACK, CAN BE NULL",
+#     "t":"ATTACKED TEAM",
+#     "s":"ATTACKED SERVICE"},
+#   ...
+# ]
+
 class ESub::Input::API < Sinatra::Base
 
   configure :production, :development do
     set :show_exceptions => false
     enable :logging
+    $redis = Redis.new(:url => 'redis://127.0.0.1:6379/1') # OMG!
   end
 
   ##
@@ -17,52 +33,36 @@ class ESub::Input::API < Sinatra::Base
   post '/flags', :provides => :json do
     pass unless request.accept? 'application/json'
 
-    flag = nil
-
-    # TODO: Save the flag
-
-    if flag
-      flag.to_json
-    else
+    begin
+      flag = params[:flag]
+      unless flag.nil?
+        result = $redis.brpush flag
+        {}.to_json
+      else
+        logger.warn("Nil flag provided!")
+      end
+    rescue Exception => exc
+      logger.warn("Could not insert flag: #{exc.class}: #{exc.message}.")
       status 500
-      {:reason => 'Another round is already started'}.to_json
+      {:reason => 'Could not insert flag.'}.to_json
     end
   end
 
-  # @method delete_flag
-  # @overload destroy '/flags/:id'
-  #
-  # @param {Integer} id The id of the flag to be removed; if :id is `latest`,
-  #                     the last received flag is removed
-  #
-  # Stop a round
-  #
-  # * *REST resource*: `flag`
-  # * *REST action*: `destroy`
-  #
-  delete '/flags/:id', :provides => :json do
+  get '/flags', :provides => :json do
     pass unless request.accept? 'application/json'
 
-    # TODO: Adapt to redis db
-    selected_flags = if params[:id].to_sym == :latest
-                        [settings.db[:rounds].last] || []
-                      else
-                        selected_flags = settings.db[:rounds].select do |round|
-                          round.id == (Integer(params[:id]) rescue nil)
-                        end
-                        if selected_flags.length > 1
-                          logger.warn("#{selected_flags.length} flags have the same id")
-                        end
-                        selected_flags
-                      end
-
-    selected_flags.each { |round| round.stop }
-
-    if selected_flags.length > 0
-      {}.to_json
-    else
+    begin
+      flag = params[:flag]
+      unless flag.nil?
+        result = $redis.rpush 'flags', flag
+        {}.to_json
+      else
+        logger.warn("Nil flag provided!")
+      end
+    rescue Exception => exc
+      logger.warn("Could not insert flag: #{exc.class}: #{exc.message}.")
       status 500
-      {:reason => 'No flags found with the provided identifier'}
+      {:reason => 'Could not insert flag.'}.to_json
     end
   end
 

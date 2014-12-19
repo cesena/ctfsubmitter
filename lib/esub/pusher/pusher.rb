@@ -1,7 +1,4 @@
 require 'logger'
-require 'pinchoff'
-require 'redis'
-require 'net/tcp_client'
 
 module ESub::Pusher
 

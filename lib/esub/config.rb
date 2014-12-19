@@ -1,5 +1,6 @@
 require 'optparse'
 require 'yaml'
+require 'fileutils'
 
 module ESub::Config
 
@@ -48,7 +49,17 @@ EOS
   end
 
   def self.parse_config(config_file_path = nil)
-    default_config = {}
+    default_config = Hashie::Mash.new({
+      :min_connect_interval => 5,
+      :pusher_threads => 4,
+      :host_for_pusher => 'localhost:9999',
+      :log_dir_path => '/tmp/emergency_submitter',
+      :input_thread_pool_size => 17,
+      :input_tcp_addr => '127.0.0.1',
+      :input_tcp_port => 8888,
+      :input_http_addr => '127.0.0.1',
+      :input_http_port => 8080
+    })
 
     override = unless config_file_path.nil?
       YAML.load_file(config_file_path)
@@ -56,7 +67,9 @@ EOS
       {}
     end
 
-    Hashie::Mash.new default_config.merge(override)
+    config = Hashie::Mash.new default_config.merge(override)
+    FileUtils.mkdir_p(config.log_dir_path)
+    config
   end
 
 end

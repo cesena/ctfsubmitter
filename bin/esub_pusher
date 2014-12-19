@@ -1,5 +1,8 @@
 #!/usr/bin/env ruby
 
+require 'pathname'
+$: << Pathname.new(__FILE__).dirname.join('..', 'lib').realpath
+
 require 'esub'
 
 ESub::Pusher::App.start ARGV

@@ -1,6 +1,12 @@
 GIT
+  remote: git://github.com/LMolr/deadline.git
+  revision: 276a41ced8473d0c9bb06fe772ad04c18ab997f2
+  specs:
+    deadline (0.1.0)
+
+GIT
   remote: git://github.com/LMolr/net_tcp_client.git
-  revision: 910786e47a9a9774f3632c4d53ddf491d467ddf9
+  revision: f05203d478678045515cd21f5613779e7b152714
   specs:
     net_tcp_client (1.0.0)
 
@@ -15,10 +21,13 @@ PATH
   remote: .
   specs:
     emergency_submitter (0.1.0)
+      deadline
       eventmachine (~> 1.0)
+      eventmachine_httpserver
       hashie (~> 3.3)
       net_tcp_client
       pinchoff
+      redis
 
 GEM
   remote: https://rubygems.org/
@@ -32,6 +41,7 @@ GEM
     debugger-linecache (1.2.0)
     diff-lcs (1.2.5)
     eventmachine (1.0.3)
+    eventmachine_httpserver (0.2.1)
     hashie (3.3.2)
     kramdown (1.5.0)
     method_source (0.8.2)
@@ -43,6 +53,7 @@ GEM
       byebug (~> 3.4)
       pry (~> 0.10)
     rake (10.4.2)
+    redis (3.2.0)
     rspec (3.1.0)
       rspec-core (~> 3.1.0)
       rspec-expectations (~> 3.1.0)
@@ -64,6 +75,7 @@ PLATFORMS
 
 DEPENDENCIES
   bundler (~> 1.7)
+  deadline!
   emergency_submitter!
   kramdown (~> 1.5)
   net_tcp_client!

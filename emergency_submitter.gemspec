@@ -18,9 +18,12 @@ Gem::Specification.new do |gem|
   gem.require_paths = ['lib']
 
   gem.add_dependency             'pinchoff'
+  gem.add_dependency             'deadline'
   gem.add_dependency             'net_tcp_client'
   gem.add_dependency             'hashie',        '~> 3.3'
   gem.add_dependency             'eventmachine',  '~> 1.0'
+  gem.add_dependency             'eventmachine_httpserver'
+  gem.add_dependency             'redis'
 
   gem.add_development_dependency 'bundler',    '~> 1.7'
   gem.add_development_dependency 'rake',       '~> 10.3'

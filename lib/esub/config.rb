@@ -51,14 +51,17 @@ EOS
   def self.parse_config(config_file_path = nil)
     default_config = Hashie::Mash.new({
       :min_connect_interval => 5,
-      :pusher_threads => 4,
+      :pusher_threads => 1,
       :host_for_pusher => 'localhost:9999',
       :log_dir_path => '/tmp/emergency_submitter',
       :input_thread_pool_size => 17,
-      :input_tcp_addr => '127.0.0.1',
+      :input_tcp_addr => '0.0.0.0',
       :input_tcp_port => 8888,
-      :input_http_addr => '127.0.0.1',
-      :input_http_port => 8080
+      :input_http_addr => '0.0.0.0',
+      :input_http_port => 8080,
+      :redis_host => 'redis://127.0.0.1:6379/1',
+      :redis_flags_key => 'flags',
+      :flag_ok_regex => /\A.*$/
     })
 
     override = unless config_file_path.nil?

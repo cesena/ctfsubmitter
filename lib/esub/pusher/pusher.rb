@@ -31,87 +31,100 @@ module ESub::Pusher
     end
 
     def _thread_task(logger, redis)
+      socket = status = nil
+
       while true
+
+        # A
+        flag ||= _read_flag_from_redis(logger, redis)
+
+        # B
+        if socket.nil? || status.nil? || status == :ko
+          socket = _new_socket(logger, throttler)
+          _read_banner(logger, socket) rescue retry
+        end
+
+        # C
         begin
-          socket = throttler.throttle do
-            logger.info('Connecting ...')
-            begin
-              Net::TCPClient.new(:server => config.host_for_pusher,
-                # Timeouts.
-                :connect_timeout        => 8,
-                :connect_retry_interval => config.min_connect_interval,
-                :connect_retry_count    => 0,
-                :read_timeout           => 4,
-
-                # Error handling.
-                :close_on_error      => true,
-                :close_on_eof        => true,
-
-                # Socket options.
-                :buffered            => true,
-                :keepalive           => true,
-                :keepidle            => 4,
-                :keepinterval        => 8,
-                :keepcount           => 4,
-
-                # Logging.
-                :logger              => logger,
-                :log_level           => :debug)
-            rescue Exception => exc
-              logger.warn "#{exc}"
-            end
-          end
-        end while socket.nil?
-        logger.info('Connected.')
-
-        status = _parse_banner(logger, socket)
-
-        while !status.nil? && status != :error # inner while
-          status = nil
-          begin
-            logger.debug("Reading from redis ...")
-            list, flag = redis.blpop('flags', :timeout => config.redis_timeout)
-            logger.debug("Processing #{list.inspect} #{flag.inspect}")
-            next if flag.nil?
-            if socket.alive?
-              socket.write(flag + "\n")
-            else
-              throttler.throttle { socket.connect }
-              socket.write(flag + "\n")
-            end
-            result = socket.gets
-            logger.debug("Result #{flag} => #{result}")
-            if !result.nil? && result =~ config.flag_ok_regex
-              logger.info "Flag good: #{flag}."
-            else
-              logger.info "Flag bad: #{flag}."
-            end
-            status = :ok
-          rescue Exception => exc
-            logger.warn exc
-            status = :error
-          end
-        end
-
-        throttler.throttle do
-          logger.info('Something is wrong: resetting connection ...')
+          _write_flag(logger, socket, flag)
+          _parse_result(logger, socket, flag)
+          status = :ok
+          flag = nil
+        rescue Exception => exc
+          logger.warn "#{exc}"
           socket.close
+          retry
         end
-      end # outer while
+
+      end # while true
     end # _thread_task
 
-    def _parse_banner(logger, socket)
-      logger.info 'Parsing banner ...'
+    def _new_socket(logger, throttler)
       begin
-        logger.info "BANNER: #{socket.gets.inspect}"
-        logger.info "BANNER: #{socket.gets.inspect}"
-        logger.info "BANNER: #{socket.gets.inspect}"
-        logger.info "BANNER: #{socket.gets.inspect}"
-      rescue Exception => exc
-        logger.warn exc
-        return :error
+        socket = throttler.throttle do
+          logger.info 'Connecting ...'
+          begin
+            Net::TCPClient.new(:server => config.host_for_pusher,
+              # Timeouts.
+              :connect_timeout        => 8,
+              :connect_retry_interval => config.min_connect_interval,
+              :connect_retry_count    => 0,
+              :read_timeout           => 4,
+
+              # Error handling.
+              :close_on_error      => true,
+              :close_on_eof        => true,
+
+              # Socket options.
+              :buffered            => true,
+              :keepalive           => true,
+              :keepidle            => 4,
+              :keepinterval        => 8,
+              :keepcount           => 4,
+
+              # Logging.
+              :logger              => logger,
+              :log_level           => :debug)
+          rescue Exception => exc
+            logger.warn "#{exc}"
+          end
+        end
+      end while socket.nil?
+      logger.info 'Connected.'
+      socket
+    end
+
+    def _read_banner(logger, socket)
+      logger.info 'Reading banner ...'
+      logger.info "BANNER: #{socket.gets.inspect}"
+      logger.info "BANNER: #{socket.gets.inspect}"
+      logger.info "BANNER: #{socket.gets.inspect}"
+      logger.info "BANNER: #{socket.gets.inspect}"
+    end
+
+    def _read_flag_from_redis(logger, redis)
+      logger.info 'Reading from redis ...'
+      begin
+        list, flag = redis.blpop('flags', :timeout => config.redis_timeout)
+      end while flag.nil?
+      logger.info("Read from redis: #{list.inspect} #{flag.inspect}")
+      flag
+    end
+
+    def _parse_result(logger, socket, flag)
+      logger.info 'Parsing result ...'
+      result = socket.gets
+      logger.debug("Result #{flag} => #{result}")
+      if !result.nil? && result =~ config.flag_ok_regex
+        logger.info "Flag good: #{flag}."
+      else
+        logger.info "Flag bad: #{flag}."
       end
-      :ok
+    end
+
+    def _write_flag(logger, socket, flag)
+      logger.info 'Writing flag ...'
+      socket.write(flag + "\n")
     end
 
   end

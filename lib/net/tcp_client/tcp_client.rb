@@ -525,7 +525,7 @@ module Net
       while (buffer =~ SEP_RE).nil?
         tmp ||= ''
         if readpartial(1, tmp, [deadline.time_left, 0].max).nil?
-          logger.debug '#gets end: eof'
+          #logger.debug '#gets end: eof'
           buffer << tmp
           return nil
         else
@@ -533,7 +533,7 @@ module Net
         end
       end
 
-      logger.info "#gets: #{buffer.inspect}"
+      #logger.info "#gets: #{buffer.inspect}"
       buffer
     end
 
@@ -746,7 +746,6 @@ module Net
     # Raises Net::TCPClient::ConnectionTimeout when the connection timeout has been exceeded
     # Raises Net::TCPClient::ConnectionFailure
     def connect_to_server(server)
-      puts "Connect_to_server"
       # Have to use Socket internally instead of TCPSocket since TCPSocket
       # does not offer async connect API amongst others:
       # :accept, :accept_nonblock, :bind, :connect, :connect_nonblock, :getpeereid,

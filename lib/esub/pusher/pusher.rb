@@ -48,17 +48,17 @@ module ESub::Pusher
                 :close_on_eof        => true,
 
                 # Socket options.
-                :buffered            => false,
-                :keepalive           => false,
+                :buffered            => true,
+                :keepalive           => true,
                 :keepidle            => 4,
                 :keepinterval        => 8,
                 :keepcount           => 4,
 
                 # Logging.
                 :logger              => logger,
-                :log_level           => :trace)
-            rescue
-              nil
+                :log_level           => :debug)
+            rescue Exception => exc
+              logger.warn "#{exc}"
             end
           end
         end while socket.nil?
@@ -73,7 +73,12 @@ module ESub::Pusher
             list, flag = redis.blpop('flags', :timeout => config.redis_timeout)
             logger.debug("Processing #{list.inspect} #{flag.inspect}")
             next if flag.nil?
-            socket.write(flag + "\n")
+            if socket.alive?
+              socket.write(flag + "\n")
+            else
+              throttler.throttle { socket.connect }
+              socket.write(flag + "\n")
+            end
             result = socket.gets
             logger.debug("Result #{flag} => #{result}")
             if !result.nil? && result =~ config.flag_ok_regex
@@ -81,6 +86,7 @@ module ESub::Pusher
             else
               logger.info "Flag bad: #{flag}."
             end
+            status = :ok
           rescue Exception => exc
             logger.warn exc
             status = :error

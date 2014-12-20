@@ -746,12 +746,13 @@ module Net
     # Raises Net::TCPClient::ConnectionTimeout when the connection timeout has been exceeded
     # Raises Net::TCPClient::ConnectionFailure
     def connect_to_server(server)
+      puts "Connect_to_server"
       # Have to use Socket internally instead of TCPSocket since TCPSocket
       # does not offer async connect API amongst others:
       # :accept, :accept_nonblock, :bind, :connect, :connect_nonblock, :getpeereid,
       # :ipv6only!, :listen, :recvfrom_nonblock, :sysaccept
       retries = 0
-      logger.benchmark_info "Connected to #{server}" do
+      #logger.benchmark_info "Connected to #{server}" do
         host_name, port = server.split(":")
         port = port.to_i
 
@@ -792,7 +793,7 @@ module Net
               raise(Net::TCPClient::ConnectionTimeout.new("Timedout after #{@connect_timeout} seconds trying to connect to #{server}"))
             end
           end
-          break
+          #break
         rescue SystemCallError => exception
           if retries < @connect_retry_count && self.class.reconnect_on_errors.include?(exception.class)
             retries += 1
@@ -803,7 +804,7 @@ module Net
           logger.error "Connection failure: #{exception.class}: #{exception.message}. Giving up after #{retries} retries"
           raise Net::TCPClient::ConnectionFailure.new("After #{retries} connection attempts to host '#{server}': #{exception.class}: #{exception.message}", @server, exception)
         end
-      end
+      #end
       @server = server
     end
 

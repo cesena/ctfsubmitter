@@ -52,7 +52,7 @@ EOS
     default_config = Hashie::Mash.new({
       :log_dir_path => '/tmp/submitter/logs',
       :pid_dir_path => '/tmp/submitter/pids',
-      :min_connect_interval => 16,
+      :min_connect_interval => 8,
       :pusher_threads => 1,
       :host_for_pusher => '10.10.10.2:31337',
       :input_thread_pool_size => 17,
@@ -63,7 +63,7 @@ EOS
       :input_environment => (ENV['environment'] || 'development'),
       :redis_host => 'redis://127.0.0.1:6379/1',
       :redis_flags_key => 'flags',
-      :redis_timeout => 3,
+      :redis_timeout => 600,
       :flag_ok_regex => /\A.*$/
     })
 

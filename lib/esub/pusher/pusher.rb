@@ -47,9 +47,11 @@ module ESub::Pusher
         # C
         begin
           _write_flag(logger, socket, flag)
-          _parse_result(logger, socket, flag)
+          result = _parse_result(logger, socket, flag)
           status = :ok
-          flag = nil
+          if result != :retry
+            flag = nil
+          end
         rescue Exception => exc
           logger.warn "#{exc}"
           socket.close
@@ -116,10 +118,18 @@ module ESub::Pusher
       logger.info 'Parsing result ...'
       result = socket.gets
       logger.debug("Result #{flag} => #{result}")
-      if !result.nil? && result =~ config.flag_ok_regex
-        logger.info "Flag good: #{flag}."
-      else
+      if (!result.nil? && result =~ /Please try again later/)
+        logger.info "Flag retry: #{flag}."
+        :retry
+      elsif (!result.nil? && result =~ /is not UP/)
+        logger.info "Flag retry: #{flag}."
+        :retry
+      elsif !result.nil? && result =~ config.flag_bad_regex
         logger.info "Flag bad: #{flag}."
+        :bad
+      else
+        logger.info "Flag good: #{flag}."
+        :good
       end
     end
 

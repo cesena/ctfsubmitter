@@ -64,7 +64,7 @@ EOS
       :redis_host => 'redis://127.0.0.1:6379/1',
       :redis_flags_key => 'flags',
       :redis_timeout => 600,
-      :flag_ok_regex => /\A.*$/
+      :flag_bad_regex => /Denied/
     })
 
     override = unless config_file_path.nil?

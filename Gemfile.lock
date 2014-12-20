@@ -5,13 +5,6 @@ GIT
     deadline (0.1.0)
 
 GIT
-  remote: git://github.com/LMolr/net_tcp_client.git
-  revision: 36cec22d908718824679f402c0c0d2958e2d085a
-  specs:
-    net_tcp_client (1.0.0)
-      deadline
-
-GIT
   remote: git://github.com/LMolr/pinchoff.git
   revision: 2b1ed206a584d1c00effcff975e4e1ffc485d0bb
   specs:
@@ -25,10 +18,10 @@ PATH
       awesome_print (~> 1.2)
       deadline
       hashie (~> 3.3)
-      net_tcp_client
       pinchoff
       rack (~> 1.5)
       redis (~> 3.2)
+      semantic_logger (~> 2.1)
       sinatra (~> 1.4)
       thin (~> 1.6)
 
@@ -73,16 +66,21 @@ GEM
     rspec-mocks (3.1.3)
       rspec-support (~> 3.1.0)
     rspec-support (3.1.2)
+    semantic_logger (2.10.0)
+      sync_attr (>= 1.0)
+      thread_safe (>= 0.1.0)
     semaphore (0.0.1)
     sinatra (1.4.5)
       rack (~> 1.4)
       rack-protection (~> 1.4)
       tilt (~> 1.3, >= 1.3.4)
     slop (3.6.0)
+    sync_attr (1.0.0)
     thin (1.6.3)
       daemons (~> 1.0, >= 1.0.9)
       eventmachine (~> 1.0)
       rack (~> 1.0)
+    thread_safe (0.3.4)
     tilt (1.4.1)
     yard (0.8.7.6)
 
@@ -94,7 +92,6 @@ DEPENDENCIES
   deadline!
   emergency_submitter!
   kramdown (~> 1.5)
-  net_tcp_client!
   pinchoff!
   pry (~> 0.10)
   pry-byebug (~> 2.0)

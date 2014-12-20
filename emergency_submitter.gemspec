@@ -19,13 +19,13 @@ Gem::Specification.new do |gem|
 
   gem.add_dependency             'pinchoff'
   gem.add_dependency             'deadline'
-  gem.add_dependency             'net_tcp_client'
   gem.add_dependency             'hashie',           '~> 3.3'
   gem.add_dependency             'redis',            '~> 3.2'
   gem.add_dependency             'rack',             '~> 1.5'
   gem.add_dependency             'thin',             '~> 1.6'
   gem.add_dependency             'sinatra',          '~> 1.4'
   gem.add_dependency             'awesome_print',    '~> 1.2'
+  gem.add_dependency             'semantic_logger',  '~> 2.1'
 
   gem.add_development_dependency 'bundler',    '~> 1.7'
   gem.add_development_dependency 'rake',       '~> 10.3'

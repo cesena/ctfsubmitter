@@ -52,9 +52,9 @@ EOS
     default_config = Hashie::Mash.new({
       :log_dir_path => '/tmp/submitter/logs',
       :pid_dir_path => '/tmp/submitter/pids',
-      :min_connect_interval => 5,
+      :min_connect_interval => 16,
       :pusher_threads => 1,
-      :host_for_pusher => 'localhost:9999',
+      :host_for_pusher => '10.10.10.2:31337',
       :input_thread_pool_size => 17,
       :input_tcp_addr => '0.0.0.0',
       :input_tcp_port => 8888,

@@ -32,31 +32,31 @@ module ESub::Pusher
 
     def _thread_task(logger, redis)
       while true
-        logger.info('Connecting ...')
         begin
           socket = throttler.throttle do
+            logger.info('Connecting ...')
             begin
               Net::TCPClient.new(:server => config.host_for_pusher,
                 # Timeouts.
-                :connect_timeout        => 4,
+                :connect_timeout        => 8,
                 :connect_retry_interval => config.min_connect_interval,
-                :connect_retry_count    => 10,
-                :read_timeout           => 5,
+                :connect_retry_count    => 0,
+                :read_timeout           => 4,
 
                 # Error handling.
                 :close_on_error      => true,
                 :close_on_eof        => true,
 
                 # Socket options.
-                :buffered            => true,
-                :keepalive           => true,
+                :buffered            => false,
+                :keepalive           => false,
                 :keepidle            => 4,
                 :keepinterval        => 8,
                 :keepcount           => 4,
 
                 # Logging.
                 :logger              => logger,
-                :log_level           => :info)
+                :log_level           => :trace)
             rescue
               nil
             end
@@ -87,17 +87,20 @@ module ESub::Pusher
           end
         end
 
-        logger.info('Something is wrong: resetting connection ...')
-        socket.close
+        throttler.throttle do
+          logger.info('Something is wrong: resetting connection ...')
+          socket.close
+        end
       end # outer while
     end # _thread_task
 
     def _parse_banner(logger, socket)
       logger.info 'Parsing banner ...'
       begin
-        logger.debug socket.gets
-        logger.debug socket.gets
-        logger.debug socket.gets
+        logger.info "BANNER: #{socket.gets.inspect}"
+        logger.info "BANNER: #{socket.gets.inspect}"
+        logger.info "BANNER: #{socket.gets.inspect}"
+        logger.info "BANNER: #{socket.gets.inspect}"
       rescue Exception => exc
         logger.warn exc
         return :error

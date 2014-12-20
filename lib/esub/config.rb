@@ -63,6 +63,7 @@ EOS
       :input_environment => (ENV['environment'] || 'development'),
       :redis_host => 'redis://127.0.0.1:6379/1',
       :redis_flags_key => 'flags',
+      :redis_timeout => 3,
       :flag_ok_regex => /\A.*$/
     })
 

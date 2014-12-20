@@ -32,7 +32,7 @@ module ESub::Pusher
 
     def _thread_task(logger, redis)
       while true
-        logger.debug('Connecting ...')
+        logger.info('Connecting ...')
         begin
           socket = throttler.throttle do
             begin
@@ -56,23 +56,27 @@ module ESub::Pusher
 
                 # Logging.
                 :logger              => logger,
-                :log_level           => :trace)
+                :log_level           => :info)
             rescue
               nil
             end
           end
         end while socket.nil?
-        logger.debug('Connected.')
+        logger.info('Connected.')
 
-        status = nil
-        begin
-          logger.debug("Reading from redis ...")
-          flag = redis.blpop('flags')
-          logger.debug("Processing #{flag}")
-          socket.write(flag)
-          result = socket.gets
-          logger.debug("Result #{flag} => #{result}")
-            if result =~ config.flag_ok_regex
+        status = _parse_banner(logger, socket)
+
+        while !status.nil? && status != :error # inner while
+          status = nil
+          begin
+            logger.debug("Reading from redis ...")
+            list, flag = redis.blpop('flags', :timeout => config.redis_timeout)
+            logger.debug("Processing #{list.inspect} #{flag.inspect}")
+            next if flag.nil?
+            socket.write(flag + "\n")
+            result = socket.gets
+            logger.debug("Result #{flag} => #{result}")
+            if !result.nil? && result =~ config.flag_ok_regex
               logger.info "Flag good: #{flag}."
             else
               logger.info "Flag bad: #{flag}."
@@ -80,12 +84,26 @@ module ESub::Pusher
           rescue Exception => exc
             logger.warn exc
             status = :error
-        end while status.nil? || status != :error # inner while
+          end
+        end
 
         logger.info('Something is wrong: resetting connection ...')
         socket.close
       end # outer while
     end # _thread_task
+
+    def _parse_banner(logger, socket)
+      logger.info 'Parsing banner ...'
+      begin
+        logger.debug socket.gets
+        logger.debug socket.gets
+        logger.debug socket.gets
+      rescue Exception => exc
+        logger.warn exc
+        return :error
+      end
+      :ok
+    end
 
   end
 

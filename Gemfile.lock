@@ -6,9 +6,10 @@ GIT
 
 GIT
   remote: git://github.com/LMolr/net_tcp_client.git
-  revision: f05203d478678045515cd21f5613779e7b152714
+  revision: 36cec22d908718824679f402c0c0d2958e2d085a
   specs:
     net_tcp_client (1.0.0)
+      deadline
 
 GIT
   remote: git://github.com/LMolr/pinchoff.git
@@ -44,7 +45,7 @@ GEM
     daemons (1.1.9)
     debugger-linecache (1.2.0)
     diff-lcs (1.2.5)
-    eventmachine (1.0.3)
+    eventmachine (1.0.4)
     hashie (3.3.2)
     kramdown (1.5.0)
     method_source (0.8.2)

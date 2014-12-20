@@ -53,6 +53,7 @@ module ESub::Pusher
         rescue Exception => exc
           logger.warn "#{exc}"
           socket.close
+          status = :ko
           next
         end
 

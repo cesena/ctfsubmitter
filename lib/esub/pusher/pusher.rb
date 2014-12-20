@@ -41,7 +41,7 @@ module ESub::Pusher
         # B
         if socket.nil? || status.nil? || status == :ko
           socket = _new_socket(logger, throttler)
-          _read_banner(logger, socket) rescue retry
+          _read_banner(logger, socket) rescue next
         end
 
         # C
@@ -53,7 +53,7 @@ module ESub::Pusher
         rescue Exception => exc
           logger.warn "#{exc}"
           socket.close
-          retry
+          next
         end
 
       end # while true
